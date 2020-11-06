@@ -6,7 +6,7 @@ import time
 sql_transaction = []
 start_row = 0
 
-connection = sqlite3.connect('TrainingData.db')
+connection = sqlite3.connect('2015-01.db')
 c = connection.cursor()
 
 #only push chanages to database every 1000 lines to save time
@@ -63,6 +63,10 @@ def find_existing_score(parent_id):
         return False
     
 if __name__ == '__main__':
+    #note: once db is created, there will be some comments paired to a null parent, so
+    #run "DELETE FROM parent_reply WHERE parent IS NULL;" from sqlite 3 in terminal after to clean up.
+
+    #create the table within the database if it does not exist
     c.execute("CREATE TABLE IF NOT EXISTS parent_reply(parent_id TEXT PRIMARY KEY, comment_id TEXT UNIQUE, parent TEXT, comment TEXT, subreddit TEXT, unix INT, score INT)")
     row_counter = 0
     paired_rows = 0
