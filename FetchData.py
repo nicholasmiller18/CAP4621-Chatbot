@@ -21,3 +21,7 @@ if __name__ == "__main__":
         parent = result[0]
 
         #parent is the string to be tokenized and inputted into the neural network.
+
+        #Dylan add your bucketing code here, within the for loop
+        
+        #after bucketing, we will throw the bucketed string into the neural neetwork within the for loop
