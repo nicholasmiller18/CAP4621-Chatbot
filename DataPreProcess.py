@@ -104,6 +104,9 @@ class dicts():
         return vec
 
 if __name__ == "__main__":
+    #Delete previous entries in tables
+    c.execute("DELETE FROM parent_nums;")
+    c.execute("DELETE FROM comment_nums;")
     #convert parent posts to numbers
 
     #create the sql table if it does not already exist
@@ -157,8 +160,6 @@ if __name__ == "__main__":
     totalPairs = result[0]
     print(totalPairs)
 
-    d = dicts()
-    irv = getIrregularVerbs()
     print("Converting strings to number arrays for the comments")
     for x in range(totalPairs):
         sql = "SELECT comment FROM parent_reply LIMIT 1 OFFSET {}".format(x)
@@ -184,3 +185,11 @@ if __name__ == "__main__":
             print(s)
             print("Converted To:")
             print(vec)
+
+    #create the sql table if it does not already exist
+    print("Saving dictionary.")
+    c.execute("CREATE TABLE IF NOT EXISTS dict(index INT, word TEXT)")
+
+    for x in range(d.maxID):
+        c.execute("INSERT INTO dict({},{})".format(x,d.getWord(x)))
+
