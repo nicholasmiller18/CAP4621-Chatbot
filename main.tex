@@ -6,6 +6,7 @@
 \usepackage[a4paper, total={7in, 10in}]{geometry}
 \usepackage{cuted}
 \usepackage{capt-of}
+\usepackage{gb4e}
 \usepackage[format=plain,
             labelfont=it,
             textfont=it]{caption}
@@ -17,8 +18,8 @@
 \setlength\parindent{0pt}
 \setlength{\parskip}{1em}
 
-\title{\textbf{Creating A Chatbot Using A Bidirectional Neural Network}}
-\author{Jonathan Weese\thanks{jonweese@ufl.edu} \and Dylan Attlesey\thanks{Dylanattlesey@ufl.edu} \and Nicholas Miller\thanks{namiller@ufl.edu}}
+\title{\textbf{Generating Reddit Comments with a Bidirectional Neural Network}}
+\author{Jonathan Weese\thanks{jonweese@ufl.edu} \and Dylan Attlesey\thanks{dylanattlesey@ufl.edu} \and Nicholas Miller\thanks{namiller@ufl.edu}}
 
 \providecommand{\keywords}[1]
 {
@@ -33,47 +34,111 @@
 \maketitle
 
 \begin{abstract}
-asdf
+Utilizing neural networks to create responses to text allows for great flexibility, applicability, and reusability.  The goal of this research is to design a model that can produce these flexible responses.  The proposed model utilizes a bidirectional neural network with an input layer of 100 nodes, two hidden layers of 64 nodes, and a final output layer of 100 nodes.  The designed model recieves tokenized sentences, and outputs a corresponding tokenized response.  These tokens are then mapped to a dictionary and converted into a sentence.
+
 \end{abstract}
 
-\keywords{asdf}
+\keywords{Neural Network}
 
 \concepts{$\bullet$\textbf{Benchmark}$\rightarrow$\textbf{Test system performance}}
 
-
 \section{Introduction}
-As technology advances, the dream of creating human-like AI arises.  Among the many complexities and problems needed to be solver to create a human-lie AI, this explores one tiny section under that umbrella, specifically dealing with responding to humans using text.  Enabled with trained neural networks, computers have the ability to create human-like responses.
+As technology advances, the dream of creating human-like AI arises.  Among the many complexities and problems needed to be solved in order to create a human-like AI, this explores one tiny section under that umbrella.  Specifically dealing with responding to humans using text.  Enabled with trained neural networks, computers have the ability to create human-like responses.
 
-Although there are many chatbots throughout the world, there are fewer that can create responses dynamically.  Most chatbots that are created check the input sentence through if statements and other methods.  This way of designing a chatbot means that the chatbot can only create responses that the engineer has coded into it.  This is allows for great control over the responses but restricts the chatbot to what the engineer has thought of.  The chatbot designed in this report can create a logical response to any input and the response is unpredictable, in contrast to the preprogrammed chatbot.  This allows for the computer to create the illusion that you can have a conversation about anything with it.
-\section{Background/Related Work}
-asdf
-\subsection*{Hadoop MapReduce}
-asdf
-\subsection*{Spark MapReduce}
-asdf
+There are two flavors of speech generation models. Less sophisticated models utilize hard-coded conditions to pick from prewritten segments of text responses. This approach allows programmers to closely control and curate responses that the model might give, but severely limits the flexibility, applicability, and reusability of a model. In contrast, the model outlined in this report should be capable of dynamically producing natural responses to any input sufficiently similar to the Reddit posts and comments on which it was trained. Ideally, this would allow for the generation of natural responses to Reddit posts.
+\section{Background}
+Of the many methods of creating a chatbot, Tensorflow's Neural Machine Translation tutorial was often reffered to.  Neural Machine Translation (NMT) is a method of translating text from one language to another.  Although we are not translating from say Enligh to French, we are translating from input to response, so the application is the same.
+
+The tutorial in Tensorflow utilizes two bidirectional recurrent neural networks, one to encode the input sentence and another to decode the encoded sentence into the corresponding language.  An illustration of the tutorial's model can be seen below.
+\begin{figure}[htp]
+    \centering
+        \includegraphics[width=\linewidth]{encdec}
+        \caption{NMT example model. \cite{Tensorflowtutorial}}
+        \label{fig:encdec}
+\end{figure}
+The approach applied in this research roughly resembles NMT's method except the second neural network has been removed.  The NMT tutorial utilizes its first network to encode a sentence into its "meaning".  This meaning is then fed into the decoder, thus translating the meaning of a sentence from one language to another.  Although our model does not use two networks to translate the meaning, our network attempts to shortcut this and create the meaning and the resulting response all at once.
+
+We had intended to use TensorFlow to train our neural network (more on this in Environment Setup).  The two main factors important to the training of any typical neural network (like that of one trained using TensorFlow) are the loss and optimizer functions chosen for it.  Loss functions, also known as evaluation functions, are what grades how good the output of a neural network is.  Loss functions get their name from the fact that they messure the differnce (loss) between the neural network's output and the desired result.  We chose to use a custom loss function for ours, which would use word embeddings to check for similarities between it's responses and the original responses it is trying to emulate.  The optimizer function is responsible for actually changing the neural network, so that it's outputs become more like the desired relult (loss = 0).  Many optimizer functions have a momentum system, where when they make an improvement to the neural network, they will start to make more changes at once until they make a chage that increases loss.  For our optimizer function, we chose the ADAM function.  ADAM is the culmination of a long line of improving optimizer functions that are each almost entirely superior to their respective predicessors, and is very commonly used and reliable.
+
 \section{Experiment}
-asdf
+In this project, our goal was to create a Reddit reply generating chatbot by using a machine translation neural network.  We have a large database of Reddit post along with their top responses.  We would have had our neural network generate responses to Reddit post, and then train the network by evaluating the quality of the responses by comparing their similarity with the actual top responses.
 \subsection*{Environment Setup}
-asdf
+The key component to our neural network is TensorFlow.  TensorFlow is a powerful open source library meant for use in the development and training of machine learning models.  Because of this, Python was our language of choice becuase it is the only laungauge that Tensorflow supports.  We were also using the Natural Language Toolkit and spaCy for parts of the project, and those also require python.
 \subsection*{Experiment Design}
-In this project, our goal was to create a Reddit reply generating chatbot by using a neural network.  We have a large database of Reddit post along with their top responses.  We would have had our neural network generate responses to Reddit post, and then evaluate the quality of the responses by comparing their similarity with the actual top responses.
+Our intention was to train our machine translation neural network on the database of Reddit post using TensorFlow.  Machine translation neural networks are typically used to translate between two languages, but here we treat inputs and outputs as two different langauges.  We felt that this would be a unique and interesting way of handling the creation of a chatbot.  Our team was also aware the something of this sort had been done before, and that it was not undoable.
 
-We would have made the comparison by using word embeddings to compare the similarity of words generated by the network to the words in the original reply.
+The networks outputs would have been evaluated with a loss function that compares the generated responses to the real responses.  This comparison would have been made possible using word embeddings.  Word embeddings allow for a rating to be given for the similarity between two words.  The goal was to reward the neural network for using words with similar meaning to those used in the actual responses ("dog" is more similar to "animal" than "car").  Through this method, the network would gradually start to generate logical replies to Reddit post.
+
 \section{Data Collection}
-The data used to train the chatbot designed in this report was taken from Reddit.  A 30 GB file filled with a month (January, 2015) of posts, comments, users, post ID's, and more was used.  This file was parsed and the posts were paired to the most up voted comment for that post.  This pair was placed into a SQL database.  After parsing the Reddit file and filling the SQL database, a total of roughly 4,700,000 pairs were created.
-\section{Data Analysis}
-asdf
+\section{Data Collection}
+\subsection*{DataSet}
+The data used to train the chatbot designed in this report was taken from Reddit.  A 30 GB file filled with a month (January, 2015) of posts, comments, users, post ID's, and more was used.  This file was parsed and the posts were paired to the most up voted comment for that post.  This pair was then to be placed into a SQL database.  After parsing the Reddit file and filling the SQL database, a total of roughly 4,700,000 pairs were created. NEEDS SPECIFIC DATA OMG Each comment is stored as a string started by the name and date of posting of a comment, e.g. [MRSandman] 10/12/2015- AND I SAID, "..."
+\subsection*{Data PreProcessing}
+Preprocessing first required that each comment and post be tokenized. Tokenization is the splitting of a large piece of contiguous data into shorter pieces. There are many approaches to the tokenization of text, but a custom tokenization process was chosen for this experiment, as the researchers felt comfortable and interested enough to write one themselves. Tokenization is necessary as neural networks only accepts vectors of numbers as inputs, not strings of characters. Characters are easily converted into integers, but models which treat each character as the fundamental units on which a neural network is trained and operates tend to result in neural networks that produce unintelligible outputs. The flexibility of the neural network, a strength in many situations, works against it by frequently producing 'words' with dynamically chosen letters. As words in natural language do not exhaust every possible permutation of characters, these networks are prone to producing non-words— gibberish. On the other hand, assigning each unique sentence a unique ID would result in grammatically correct (or at least so correct as to be Reddit posts) sentences in responses. But then each sentence would be immutable, and no new sentences could be generated to respond in a novel situation. Furthermore, the vast majority of sentences are unlikely to have appeared more than once in the dataset, making it very difficult to train a neural network on it.
+\par This process first utilized the Natural Language Toolkit libraries — or NLTK — to provide the initial tokenization. NLTK's tokenization function splits strings into an ordered list of substrings, with each mostly corresponding to one word or piece of punctuation; for example the string  
+\begin{exe}
+		\ex "Mary speaks German."
+\end{exe}
+would be tokenized as so:
+\begin{exe}
+		\ex \{'Mary', 'speaks', 'German', '.'\}
+\end{exe}
+However, NLTK's tokenization function was chosen for its handling of possessives and contractions. It splits the apostraphe and 's' or contracted word at the end of another word from its stem. Thus
+\begin{exe}
+		\ex "Mary's German isn't very good."
+\end{exe}
+would be tokenized as
+\begin{exe}
+		\ex \{'Mary', ''s', 'German', 'is', 'n't', 'very', 'good', '.'\}
+\end{exe}
+Without the splitting of contractions and possessive markers, each word and, for example, its corresponding possessive form, would be considered separate words and thus given unique, unrelated ID's. This can diminish a model's ability to recognize their semantic relationship. In (1) and (3), 'Mary' and 'Mary's' would be treated as unrelated words. But with NLTK's tokenization, 'Mary' is recognized as a word in both sentences, and 'isn't' as a combination of 'is' and 'n't'.
+\par Similarly, other suffixes in English encode semantic information, but don't alter the core semantic value of a stem. Most obvious of these are inflectional tense/person/number endings for verbs and the pluralizing suffix for nouns. NLTK's tokenizer does nothing to split these from their stems, resulting in the same lack of representation of semantic similarity. Fortunately, NLTK provides the Snowball stemmer, alternatively known as the Porter Stemmer 2. The Snowball stemmer strips inflectional and derivational suffixes from words. A naïve use of this stemmer would be to directly split the suffix from the stem. 
+\begin{exe}
+		\ex
+			\begin{xlist}
+				\ex "Mary's singing voice is transcendently beautiful."
+				\ex \{'Mary', ''s', 'sing',' ing', 'voice', 'is', 'transcendent', 'ly', 'beauti', 'ful', '.' \}
+			\end{xlist}
+\end{exe}
+Example (5)b shows the result of the application of a stemmer to each token in sentence (5)a, and the insertion of the removed suffixes after their respective stems. It produces a desirable effect for 'singing' and 'trancendently': the inflectional suffix encoding the perfective aspect is correctly split from 'sing', and the adverbializing derivational suffix 'ly' from 'transcendent'. Unfortunately, while it correctly splits 'ful' from 'beauti', this method fails to show that the root of 'beautiful' is 'beauty'.
+\par To determine the roots of words, a rather more sophisticated process is needed: lemmatization. Lemmatization transforms a word into its citation form, known as a 'lemma'. The lemma of 'beautiful' is 'beauty', as was needed. Thus, instead of splitting words into stem and suffix, the words may be split into lemma and suffix.
+\begin{exe}
+		\ex
+			\begin{xlist}
+				\ex "Mary is beautiful."
+				\ex \{'Mary', 'is', 'beauty', 'ful', '.' \}
+				\ex "Mary exemplifies beauty."
+				\ex \{'Mary', 'exemplify', 'ifies', 'beauty', '.' \}
+			\end{xlist}
+\end{exe}
+This method allows the preprocessor, and thus the neural network, to avoid the pitfalls created by morphophonological rules. In (6), the suffixies 'ful' and 'ifies' are correctly extracted without using a morphophonologically conditioned, and thus less readily interpretable, stem. 
+\par There were a few other cases the preprocessor accounts for: first, to add the 'ing' suffix to the end of a word with a single consonant at the end of its root, one must double the consonant. A special conditional statement was included to remove this.
+Second, spaCy's library provides a module for entity detection; large corporations, proper names, and the names of states are all tagged as entities by spaCy's model. Once entities had been detected, the words composing them were tokenized, then protected from further alteration (stemming/lemmatizing). For example, "BigNumbers Limited" would be processed into \{'bignumbers', 'limit', 'ed'\}, but instead is processed into \{'BigBumbers', 'Limited'\}. However, the researchers are not confident whether this would contribute to or detract from the naturalness of the output of a model. On the one hand, it may prevent the model from separating suffixes from proper nouns, which is ideal, but it will prevent the model from modeling semantic relationships between the entities and the semantic components that compose them.   
+ 
+\section{Performance Analysis}
+\subsection*{Preprocessor Efficiency}
+Unfortunately, due to the glacial pace of the preprocessor and a brutally untimely power outage, performance analysis outside of efficiency was impossible. A message was printed to the terminal for each 10,000 posts processed, which gave a rough estimate for how the proprocessing was progressing. The time to insert an entry into an SQL database is linear and dependent on the size of the inserted element; thus it is the belief of the researchers is that the greatest contributor to the meteoric increase in processing time needed per 10,000 words was the fault of the word to word ID dictionary. For each word processed, the dictionary was checked for a key and ID to represent that word; if not found, the word was inserted with a new ID. As Python's dictionaries are analogous to a hash table, they should have O(n) insertion time and O(1) access time. However, Zipf's law implies that encounters with unknown words should slow drastically with time, so the need to even utilize a linear-time operation or resize the table should have slowed considerably over time. 
+\subsection*{Efficacy}
+Fortunately, Reddit provides a simple and powerful tool to measure the 'efficacy' of a comment: votes. Each time a Reddit user reads a post or comment, they choose to give it an 'upvote' (providing postive feedback), a 'downvote' (providing negative feedback), or no vote at all. The overall of score of a comment is the number of downvotes it has been given subtracted from the upvotes it has been given. A linear, discrete score is incredibly useful in statistics, but there is a downside: the efficacy of a model's output is relative, and may only be judged in relation to another comment. Ideally, a study would compare two implementations or models based on the average score of comments they produce, or compare the output of one model against (assumedly) human-generated comments. This experiment was slated to compare two models, one trained only on the highest-scoring comment of each post or comment, and another on all comments, with inputs weighted according to their score. However, there are other dimensions of comparison across which the researchers would have compared. The dataset provides record of not only the score, but the number of upvotes and downvotes a comment receives. It is quite possible that a hypothetical model A would receive a lower average score per comment posted, but but receive more upvotes overall than model B; such a situation would suggest that model A generates more controversial comments. Personal experience of the authors suggests that comments perceived as gramatically incorrect tend to garner a greater number of downvotes. A model that generates what are judged to be syntactically invalid but repairable and more semantically tailored sentences might just produce a statistical outcome like that described for model A.
+\par  Overall, the end goal would be to create a model that generates comments with the highest average score. However, in the early stages of attempting to iteratively tailor a comment generator, it may be useful to place more stock in upvotes recieved; many comments might receive mostly downvotes, and the focus might shift to methods that seek to ameliorate the number of negative responses, which may require an altogether different strategy than maximizing overall score.  
 \section{Discussion}
-\subsection*{Reflection}
-\subsection*{Future Work}
-asdf 
-\subsection*{Conclusion}
-asdf
+\subsection*{Jonathan's Reflection}
+At the begining of this semester I had no knowledge on how to create a neural network or how to create a chatbot.  This entire project has been a challenging but rewarding learning experience.  I learned which libraries are used to create neural networks (Tensorflow), I learned that neural networks can only handle numbers, so we had to design a method to turn every sentence and word into something the model could understand.  We also had to figure out how to turn those numbers back into words.  I learned how neural networks are trained, using evaluation functions and loss functions.  I learned how to save a model by creating check point files.  I learned how to load and inference a previously trained model.  But most importantly I learned that creating a chatbot is not as simple as it seems.  I also discovered the immense computing power required to not only train a chatbot but to preprocess the training data.
+\subsection*{Dylan's Reflection}
+Overall, we only really 
+\subsection*{Nicholas's Reflection}
+As they say in France, 'honhonhonhonh...'
+\section*{Conclusion}
+SOMETHING
+\section*{Future Work}
+If more time were alotted, this would allow for all the traininng data to be preprocessed, thus allowing the model to be trained and demonstrated.  However if time is of the essence, possible solutions can be to reduce the amount of training pairs, which would reduce traiing time.
+
+Another problem that could have risen from our model is the issue with padding.  Our model was designed for 100 input nodes.  If the sentence is short, the last bit of nodes are 0.  This results in the latter nodes recieving significantly much less training than the beginning nodes.  This in turn results in less accurate responses when longer inputs are given.  Solutions to this problem should be explored in the future.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
 \bibliographystyle{acm}
 \bibliography{sample}
-
-
 
 
 \end{document}
