@@ -3,6 +3,7 @@ import os
 import tensorflow as tf
 from tensorflow import keras
 import spacy
+import numpy as np
 from spacy.lemmatizer import Lemmatizer
 from spacy.lookups import Lookups
 from nltk.tokenize import word_tokenize
@@ -15,12 +16,12 @@ c = connection.cursor()
 def CreateModel():
     #Define the neural network
     model = tf.keras.models.Sequential()
-    model.add(keras.layers.Bidirectional(keras.layers.LSTM(units=100, return_sequences=True),input_shape=100)) #input layer
+    model.add(keras.layers.Bidirectional(keras.layers.LSTM(units=100, return_sequences=True),input_shape=(100,1))) #input layer
     model.add(keras.layers.Bidirectional(keras.layers.LSTM(units=64))) #middle layers
     model.add(keras.layers.Dense(units=100,name='Output'))
 
     #Compile the model
-    model.compile(optimizer='Adam',loss='CosineSimilarity')
+    model.compile(optimizer='Adam',loss='mean_squared_error')
 
     model.summary()
 
@@ -33,23 +34,25 @@ def convertToNums(s):
     for token in tokens:
         if i >= 100:
             break
-        sql = "SELECT index FROM dict WHERE word = {};".format(token)
-        c.execute(sql)
+        c.execute("SELECT \"index\" FROM dict WHERE word = '{}';".format(token))
         num = c.fetchone()
-        ret.append(num)
+        ret.append(num[0])
         i+=1
     while len(ret) < 100:
         ret.append(0)
     return ret
 
 def convertToSentence(output_data):
+    #round up the values to whole numbers
+    rounded = output_data.astype(int)
+    arr = rounded.reshape(100)
     ret = []
-    for token in output_data:
+    for token in arr:
         if token != 0:
-            sql = "SELECT word FROM dict WHERE index = {};".format(token)
+            sql = "SELECT word FROM dict WHERE \"index\" = {};".format(token)
             c.execute(sql)
             word = c.fetchone()
-            ret.append(word)
+            ret.append(word[0])
         else:
             break
     sentence = ""
@@ -68,10 +71,11 @@ if __name__ == "__main__":
 
     while True:
         #ask for a sentence to input
-        s = Input("Enter a sentence: ")
+        s = input("Enter a sentence: ")
 
         #covert the sentence to numbers
-        input_data = convertToNums(s)
+        i_data = convertToNums(s)
+        input_data = np.array(i_data).reshape(1,100,1)
 
         #input the sentence to the model
         output_data = model.predict(input_data)
